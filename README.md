@@ -50,7 +50,7 @@ python pdf_translator.py my_document.pdf -t fr -o ./translations -s
 
 ## Supported Languages
 
-The tool uses Google Translate's language codes. Some common ones:
+The tool uses standard language codes. Some common ones:
 
 - English: `en`
 - Spanish: `es`
@@ -60,9 +60,9 @@ The tool uses Google Translate's language codes. Some common ones:
 - Portuguese: `pt`
 - Russian: `ru`
 - Japanese: `ja`
-- Chinese (Simplified): `zh-cn`
+- Chinese (Simplified): `zh`
 
-For a complete list of language codes, visit [Google Translate API documentation](https://cloud.google.com/translate/docs/languages).
+Note: This tool uses the LibreTranslate API, which supports a wide range of languages but may not support all language pairs.
 
 ## Troubleshooting
 
