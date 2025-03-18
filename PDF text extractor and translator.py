@@ -37,38 +37,99 @@ def extract_text_from_pdf(pdf_path):
         raise
 
 def translate_text(text, target_language):
-    """Translate text to the target language using LibreTranslate API."""
+    """Translate text using an offline approach with NLTK for basic Latin translation."""
     logger.info(f"Translating text to {target_language}")
     
     try:
-        # Using LibreTranslate public API - consider setting up your own instance for heavy use
-        API_URL = "https://translate.argosopentech.com/translate"
+        # Import offline translation tools
+        import nltk
+        from nltk.translate import Alignment
         
-        # Break the text into chunks to avoid hitting API limits
-        chunk_size = 4000
-        chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+        # This is a very simplified approach for demo purposes
+        # For actual Latin translation, you would need a proper Latin-English dictionary
+        # or a specialized library
         
-        translated_chunks = []
-        for i, chunk in enumerate(chunks):
-            logger.info(f"Translating chunk {i+1}/{len(chunks)}")
+        # First, check if we have the necessary NLTK data
+        try:
+            nltk.data.find('tokenizers/punkt')
+        except LookupError:
+            logger.info("Downloading NLTK punkt tokenizer...")
+            nltk.download('punkt')
             
-            payload = {
-                "q": chunk,
-                "source": "auto",
-                "target": target_language
-            }
+        # Basic Latin-English dictionary for common words
+        latin_dict = {
+            "et": "and", "in": "in", "est": "is", "ad": "to", "non": "not",
+            "ex": "from", "cum": "with", "quod": "which/because", "sed": "but",
+            "si": "if", "sunt": "are", "hoc": "this", "esse": "to be", "qui": "who",
+            "ut": "as/that", "per": "through", "quam": "than/how", "aut": "or",
+            "ego": "I", "tu": "you", "nos": "we", "vos": "you (plural)",
+            "meus": "my", "tuus": "your", "noster": "our", "vester": "your (plural)",
+            "homo": "man/human", "deus": "god", "vita": "life", "mors": "death",
+            "terra": "earth/land", "aqua": "water", "ignis": "fire", "aer": "air",
+            "rex": "king", "natura": "nature", "tempus": "time", "annus": "year",
+            "dies": "day", "nox": "night", "sol": "sun", "luna": "moon",
+            "caelum": "sky/heaven", "mare": "sea", "flumen": "river",
+            "urbs": "city", "via": "way/road", "bellum": "war", "pax": "peace",
+            "virtus": "virtue/courage", "amor": "love", "corpus": "body",
+            "anima": "soul", "mens": "mind", "ratio": "reason", "scientia": "knowledge",
+            "liber": "book/free", "verbum": "word", "nomen": "name",
+            "magnus": "great/large", "parvus": "small", "bonus": "good", "malus": "bad",
+            "verus": "true", "falsus": "false", "novus": "new", "vetus": "old",
+            "facere": "to do/make", "videre": "to see", "dicere": "to say/speak",
+            "audire": "to hear", "scire": "to know", "venire": "to come",
+            "ire": "to go", "dare": "to give", "habere": "to have",
+            "potestas": "power", "imperium": "command/empire"
+        }
+        
+        # Tokenize the text
+        sentences = nltk.sent_tokenize(text)
+        translated_sentences = []
+        
+        for sentence in sentences:
+            words = nltk.word_tokenize(sentence)
+            translated_words = []
             
-            response = requests.post(API_URL, json=payload)
-            if response.status_code == 200:
-                translated_chunks.append(response.json()["translatedText"])
-            else:
-                logger.error(f"Translation API error: {response.text}")
-                raise Exception(f"Translation API returned status code {response.status_code}")
+            for word in words:
+                # Remove punctuation for dictionary lookup
+                clean_word = ''.join(c for c in word.lower() if c.isalnum())
+                
+                # Look up in dictionary, preserve case and punctuation
+                if clean_word in latin_dict:
+                    # Try to preserve the case
+                    if word.isupper():
+                        translated_words.append(latin_dict[clean_word].upper())
+                    elif word[0].isupper():
+                        translated_words.append(latin_dict[clean_word].capitalize())
+                    else:
+                        translated_words.append(latin_dict[clean_word])
+                else:
+                    # Keep original word if not in dictionary
+                    translated_words.append(word)
             
-        return "".join(translated_chunks)
+            # Reconstruct the sentence - very simplistic approach
+            translated_sentence = ' '.join(translated_words)
+            
+            # Some basic cleanup (this is overly simplistic for demo purposes)
+            translated_sentence = translated_sentence.replace(' , ', ', ')
+            translated_sentence = translated_sentence.replace(' . ', '. ')
+            
+            translated_sentences.append(translated_sentence)
+        
+        translated_text = ' '.join(translated_sentences)
+        
+        # Add translation note
+        translation_note = (
+            "\n\n[NOTE: This is a very basic translation attempt using a limited Latin-English dictionary. "
+            "For accurate translations, please consult a professional translator or specialized Latin "
+            "translation tools. Many words may remain untranslated or be translated incorrectly.]"
+        )
+        
+        return translated_text + translation_note
+        
     except Exception as e:
         logger.error(f"Error translating text: {str(e)}")
-        raise
+        # Instead of failing, return original with note about failure
+        return text + "\n\n[ERROR: Translation failed. Please ensure you have an internet connection or try a different translation approach. Error details: " + str(e) + "]"
 
 def save_to_file(text, output_path):
     """Save text to a file."""
