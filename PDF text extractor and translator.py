@@ -2,7 +2,7 @@ import argparse
 import os
 from pathlib import Path
 import PyPDF2
-from googletrans import Translator
+import requests
 import logging
 
 # Configure logging
@@ -37,23 +37,34 @@ def extract_text_from_pdf(pdf_path):
         raise
 
 def translate_text(text, target_language):
-    """Translate text to the target language."""
+    """Translate text to the target language using LibreTranslate API."""
     logger.info(f"Translating text to {target_language}")
     
     try:
-        translator = Translator()
+        # Using LibreTranslate public API - consider setting up your own instance for heavy use
+        API_URL = "https://translate.argosopentech.com/translate"
         
         # Break the text into chunks to avoid hitting API limits
-        # Google Translate API typically has a limit around 5000 characters
         chunk_size = 4000
         chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
         
         translated_chunks = []
         for i, chunk in enumerate(chunks):
             logger.info(f"Translating chunk {i+1}/{len(chunks)}")
-            translation = translator.translate(chunk, dest=target_language)
-            translated_chunks.append(translation.text)
-        
+            
+            payload = {
+                "q": chunk,
+                "source": "auto",
+                "target": target_language
+            }
+            
+            response = requests.post(API_URL, json=payload)
+            if response.status_code == 200:
+                translated_chunks.append(response.json()["translatedText"])
+            else:
+                logger.error(f"Translation API error: {response.text}")
+                raise Exception(f"Translation API returned status code {response.status_code}")
+            
         return "".join(translated_chunks)
     except Exception as e:
         logger.error(f"Error translating text: {str(e)}")
