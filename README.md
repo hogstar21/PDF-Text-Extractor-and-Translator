@@ -50,19 +50,16 @@ python pdf_translator.py my_document.pdf -t fr -o ./translations -s
 
 ## Supported Languages
 
-The tool uses standard language codes. Some common ones:
+This version of the tool includes a basic Latin-to-English dictionary for simple translations. It works entirely offline and doesn't require an internet connection.
 
-- English: `en`
-- Spanish: `es`
-- French: `fr`
-- German: `de`
-- Italian: `it`
-- Portuguese: `pt`
-- Russian: `ru`
-- Japanese: `ja`
-- Chinese (Simplified): `zh`
+**Important note about the translation quality**:
+- The translation is very basic and uses a limited dictionary of common Latin words
+- Many words may remain untranslated, especially specialized or uncommon terms
+- The grammar and word order will often be incorrect
+- For accurate translations, consider using a professional translator or specialized Latin translation tools
 
-Note: This tool uses the LibreTranslate API, which supports a wide range of languages but may not support all language pairs.
+**Target Language**:
+Currently, only translation to English (`en`) is supported in this offline version. Other target language codes will be ignored.
 
 ## Troubleshooting
 
